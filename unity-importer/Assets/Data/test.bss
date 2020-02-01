@@ -1,6 +1,7 @@
 {
     "tileWidth": 20,
     "tileHeight": 30,
+    "frameRate": 10,
     "animations": [
     	{
     		"name": "run",
@@ -15,7 +16,7 @@
     		"end": 16
     	},
     	{
-    		"name": "run",
+    		"name": "climb",
     		"end": 20
     	}
     ]

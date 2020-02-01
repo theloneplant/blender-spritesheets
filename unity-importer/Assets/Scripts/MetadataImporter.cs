@@ -2,6 +2,7 @@
 {
     using System.IO;
     using UnityEditor.Experimental.AssetImporters;
+    using UnityEditor;
     using UnityEngine;
 
     // Blender sprite sheet
@@ -10,17 +11,20 @@
     {
         public override void OnImportAsset(AssetImportContext ctx)
         {
-            SpritesheetMetadata metadata = ScriptableObject.CreateInstance<SpritesheetMetadata>();
             string text = File.ReadAllText(ctx.assetPath);
-            JsonUtility.FromJsonOverwrite(text, metadata);
-            if (!metadata.Valid)
+            JsonMetadata parsed = JsonUtility.FromJson<JsonMetadata>(text);
+            if (!parsed.Valid)
             {
                 Debug.LogError("Invalid Blender spritesheet metadata");
                 return;
             }
+            SpritesheetMetadata metadata = ScriptableObject.CreateInstance<SpritesheetMetadata>();
+            metadata.InitFromBss(parsed);
 
             ctx.AddObjectToAsset("metadata", metadata);
             ctx.SetMainObject(metadata);
+
+            AssetDatabase.SaveAssets();
         }
     }
 }

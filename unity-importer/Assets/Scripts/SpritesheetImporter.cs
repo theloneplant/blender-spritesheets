@@ -55,30 +55,28 @@
                 var importer = assetImporter as TextureImporter;
                 Vector2Int size = importer.TextureSize();
 
-                int tilesX = size.x / metadata.tileWidth;
-                int tilesY = size.y / metadata.tileHeight;
-                int tileCount = tilesX * tilesY;
-
+                int tilesX = size.x / metadata.tileSize.x;
                 var tiles = new List<SpriteMetaData>();
                 int previousStart = 0;
-                foreach (Animation anim in metadata.animations)
+                foreach (KeyValuePair<string, int> pair in metadata.animations)
                 {
-                    for (int i = previousStart; i < anim.end; i++)
+                    int endFrame = pair.Value;
+                    for (int i = previousStart; i < endFrame; i++)
                     {
                         int x = i % tilesX;
                         int y = i / tilesX;
-                        var dims = new Vector2(metadata.tileWidth, metadata.tileHeight);
+                        var dims = new Vector2(metadata.tileSize.x, metadata.tileSize.y);
                         var rect = new Rect(new Vector2(x, y) * dims, dims);
                         tiles.Add(new SpriteMetaData
                         {
-                            name = string.Format("{0}{1}", anim.name, i - previousStart),
+                            name = string.Format("{0}{1}", pair.Key, i - previousStart),
                             border = Vector4.zero,
                             alignment = (int)alignment,
                             pivot = pivots[(int)alignment],
                             rect = rect,
                         });
                     }
-                    previousStart = anim.end;
+                    previousStart = endFrame;
                 }
 
                 importer.spriteImportMode = SpriteImportMode.Multiple;

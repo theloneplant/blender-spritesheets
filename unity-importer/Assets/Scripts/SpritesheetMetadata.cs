@@ -4,35 +4,56 @@ using UnityEngine;
 
 namespace Spritesheet
 {
-    // Probably better to deserialize to an intermediate format and 
-    // then construct the final scriptable with support for
-    // dictionaries and vector types and such
-    [Serializable]
     public class SpritesheetMetadata : ScriptableObject
     {
-        public int tileWidth;
-        public int tileHeight;
-        public List<Animation> animations = new List<Animation>();
+        public Vector2Int tileSize;
+        public int frameRate;
+        public Dictionary<string, int> animations = new Dictionary<string, int>();
 
-        public bool Valid
+        internal void InitFromBss(JsonMetadata json)
         {
-            get
+            tileSize = new Vector2Int(json.tileWidth, json.tileHeight);
+            frameRate = json.frameRate;
+            foreach (JsonAnimation anim in json.animations)
             {
-                bool valid = true;
-                foreach (Animation anim in animations)
-                {
-                    valid &= anim.Valid;
-                }
-                return valid && tileWidth > 0 && tileHeight > 0 && animations.Count > 0;
+                animations.Add(anim.name, anim.end);
             }
         }
     }
 
     [Serializable]
-    public struct Animation
+    internal class JsonMetadata
     {
-        public string name;
-        public int end;
+        public int tileWidth = 0;
+        public int tileHeight = 0;
+        public int frameRate = 0;
+        public List<JsonAnimation> animations = null;
+
+        public bool Valid => animations != null &&
+                    ValidAnimations &&
+                    tileWidth > 0 &&
+                    tileHeight > 0 &&
+                    frameRate > 0;
+
+        private bool ValidAnimations
+        {
+            get
+            {
+                bool valid = true;
+                foreach (JsonAnimation anim in animations)
+                {
+                    valid &= anim.Valid;
+                }
+                return valid;
+            }
+        }
+    }
+
+    [Serializable]
+    internal class JsonAnimation
+    {
+        public string name = null;
+        public int end = 0;
 
         public bool Valid => name != null && end > -1;
     }
