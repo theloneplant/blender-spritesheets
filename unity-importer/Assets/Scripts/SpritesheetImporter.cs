@@ -38,6 +38,90 @@
 
         private void OnPreprocessTexture()
         {
+            SpritesheetMetadata metadata = GetMetadata();
+            if (metadata == null)
+            {
+                return;
+            }
+
+            var importer = assetImporter as TextureImporter;
+            Vector2Int size = importer.TextureSize();
+
+            int tilesX = size.x / metadata.tileWidth;
+            int tilesY = size.y / metadata.tileHeight;
+            int tileCount = tilesX * tilesY;
+
+            var tiles = new List<SpriteMetaData>();
+            int previousStart = 0;
+            foreach (Animation anim in metadata.animations)
+            {
+                for (int i = previousStart; i < anim.end; i++)
+                {
+                    int x = i % tilesX;
+                    int y = i / tilesX;
+                    var dims = new Vector2(metadata.tileWidth, metadata.tileHeight);
+                    var rect = new Rect(new Vector2(x, y) * dims, dims);
+                    tiles.Add(new SpriteMetaData
+                    {
+                        name = string.Format("{0}{1}", anim.name, i - previousStart),
+                        border = Vector4.zero,
+                        alignment = (int)alignment,
+                        pivot = pivots[(int)alignment],
+                        rect = rect,
+                    });
+                }
+                previousStart = anim.end;
+            }
+
+            importer.spriteImportMode = SpriteImportMode.Multiple;
+            importer.spritesheet = tiles.ToArray();
+        }
+
+        private void OnPostprocessTexture(Texture2D tex)
+        {
+            SpritesheetMetadata metadata = GetMetadata();
+            if (metadata == null)
+            {
+                return;
+            }
+
+            int previousStart = 0;
+            foreach (Animation anim in metadata.animations)
+            {
+                var binding = new EditorCurveBinding
+                {
+                    type = typeof(SpriteRenderer),
+                    path = "",
+                    propertyName = "m_Sprite"
+                };
+                Object[] sprites = AssetDatabase.LoadAllAssetRepresentationsAtPath(assetPath);
+                int count = anim.end - previousStart;
+                var keys = new ObjectReferenceKeyframe[count];
+                for (int i = 0; i < count; i++)
+                {
+                    keys[i] = new ObjectReferenceKeyframe
+                    {
+                        time = i,
+                        value = sprites[i + previousStart],
+                    };
+                }
+                var clip = new AnimationClip
+                {
+                    frameRate = metadata.frameRate,
+                };
+                AnimationUtility.SetObjectReferenceCurve(clip, binding, keys);
+
+                DirectoryInfo parent = Directory.GetParent(assetPath);
+                string path = Path.Combine(parent.ToString(), string.Format("{0}.anim", anim.name));
+                AssetDatabase.CreateAsset(clip, path);
+
+                previousStart = anim.end;
+            }
+
+        }
+
+        private SpritesheetMetadata GetMetadata()
+        {
             string parent = Directory.GetParent(assetPath).ToString();
             string name = Path.GetFileNameWithoutExtension(assetPath);
             string query = string.Format("{0} t:SpritesheetMetadata", name);
@@ -47,71 +131,13 @@
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
                 SpritesheetMetadata metadata = AssetDatabase.LoadAssetAtPath<SpritesheetMetadata>(path);
-                if (metadata.name != name)
+                if (metadata.name == name)
                 {
-                    continue;
+                    return metadata;
                 }
-
-                var importer = assetImporter as TextureImporter;
-                Vector2Int size = importer.TextureSize();
-
-                int tilesX = size.x / metadata.tileWidth;
-                int tilesY = size.y / metadata.tileHeight;
-                int tileCount = tilesX * tilesY;
-
-                var tiles = new List<SpriteMetaData>();
-                int previousStart = 0;
-                foreach (Animation anim in metadata.animations)
-                {
-                    for (int i = previousStart; i < anim.end; i++)
-                    {
-                        int x = i % tilesX;
-                        int y = i / tilesX;
-                        var dims = new Vector2(metadata.tileWidth, metadata.tileHeight);
-                        var rect = new Rect(new Vector2(x, y) * dims, dims);
-                        tiles.Add(new SpriteMetaData
-                        {
-                            name = string.Format("{0}{1}", anim.name, i - previousStart),
-                            border = Vector4.zero,
-                            alignment = (int)alignment,
-                            pivot = pivots[(int)alignment],
-                            rect = rect,
-                        });
-                    }
-                    previousStart = anim.end;
-                }
-
-                importer.spriteImportMode = SpriteImportMode.Multiple;
-                importer.spritesheet = tiles.ToArray();
             }
-        }
 
-        private void OnPostprocessTexture(Texture2D tex)
-        {
-            var binding = new EditorCurveBinding
-            {
-                type = typeof(SpriteRenderer),
-                path = "",
-                propertyName = "m_Sprite"
-            };
-            Object[] sprites = AssetDatabase.LoadAllAssetRepresentationsAtPath(assetPath);
-            var keys = new ObjectReferenceKeyframe[sprites.Length];
-            for (int i = 0; i < sprites.Length; i++)
-            {
-                keys[i] = new ObjectReferenceKeyframe
-                {
-                    time = i,
-                    value = sprites[i],
-                };
-            }
-            var clip = new AnimationClip
-            {
-                frameRate = 60
-            };
-            AnimationUtility.SetObjectReferenceCurve(clip, binding, keys);
-
-            string path = Path.ChangeExtension(assetPath, "anim");
-            AssetDatabase.CreateAsset(clip, path);
+            return null;
         }
     }
 }

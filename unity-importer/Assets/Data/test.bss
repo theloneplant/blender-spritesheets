@@ -1,21 +1,22 @@
 {
     "tileWidth": 20,
     "tileHeight": 30,
+    "frameRate": 10,
     "animations": [
     	{
     		"name": "run",
-    		"end": 0	
-    	},
-    	{
-    		"name": "jump",
     		"end": 6	
     	},
     	{
-    		"name": "idle",
-    		"end": 16
+    		"name": "jump",
+    		"end": 10	
     	},
     	{
-    		"name": "run",
+    		"name": "idle",
+    		"end": 12
+    	},
+    	{
+    		"name": "crouch",
     		"end": 20
     	}
     ]

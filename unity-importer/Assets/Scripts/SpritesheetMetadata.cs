@@ -4,17 +4,22 @@ using UnityEngine;
 
 namespace Spritesheet
 {
-    // Probably better to deserialize to an intermediate format and 
-    // then construct the final scriptable with support for
-    // dictionaries and vector types and such
     [Serializable]
     public class SpritesheetMetadata : ScriptableObject
     {
         public int tileWidth;
         public int tileHeight;
-        public List<Animation> animations = new List<Animation>();
+        public int frameRate;
+        public List<Animation> animations;
 
-        public bool Valid
+        public bool Valid => animations != null &&
+                    ValidAnimations &&
+                    tileWidth > 0 &&
+                    tileHeight > 0 &&
+                    frameRate > 0 &&
+                    animations.Count > 0;
+
+        private bool ValidAnimations
         {
             get
             {
@@ -23,7 +28,7 @@ namespace Spritesheet
                 {
                     valid &= anim.Valid;
                 }
-                return valid && tileWidth > 0 && tileHeight > 0 && animations.Count > 0;
+                return valid;
             }
         }
     }
