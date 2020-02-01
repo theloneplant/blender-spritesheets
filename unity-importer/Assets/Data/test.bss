@@ -4,19 +4,19 @@
     "animations": [
     	{
     		"name": "run",
-    		"start": 0	
+    		"end": 0	
     	},
     	{
     		"name": "jump",
-    		"start": 6	
+    		"end": 6	
     	},
     	{
     		"name": "idle",
-    		"start": 16
+    		"end": 16
     	},
     	{
     		"name": "run",
-    		"start": 20
+    		"end": 20
     	}
     ]
 }
