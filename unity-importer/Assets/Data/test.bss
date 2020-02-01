@@ -1,0 +1,22 @@
+{
+    "tileWidth": 20,
+    "tileHeight": 30,
+    "animations": [
+    	{
+    		"name": "run",
+    		"start": 0	
+    	},
+    	{
+    		"name": "jump",
+    		"start": 6	
+    	},
+    	{
+    		"name": "idle",
+    		"start": 16
+    	},
+    	{
+    		"name": "run",
+    		"start": 20
+    	}
+    ]
+}
