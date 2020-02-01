@@ -7,7 +7,8 @@
 
     internal class SpritesheetImporter : AssetPostprocessor
     {
-        public SpriteAlignment alignment;
+        // Where to let the user change this? 
+        public SpriteAlignment alignment = SpriteAlignment.Center;
 
         // Maps SpriteAlignment to pivot
         private readonly Vector2[] pivots = new Vector2[]
@@ -83,6 +84,34 @@
                 importer.spriteImportMode = SpriteImportMode.Multiple;
                 importer.spritesheet = tiles.ToArray();
             }
+        }
+
+        private void OnPostprocessTexture(Texture2D tex)
+        {
+            var binding = new EditorCurveBinding
+            {
+                type = typeof(SpriteRenderer),
+                path = "",
+                propertyName = "m_Sprite"
+            };
+            Object[] sprites = AssetDatabase.LoadAllAssetRepresentationsAtPath(assetPath);
+            var keys = new ObjectReferenceKeyframe[sprites.Length];
+            for (int i = 0; i < sprites.Length; i++)
+            {
+                keys[i] = new ObjectReferenceKeyframe
+                {
+                    time = i,
+                    value = sprites[i],
+                };
+            }
+            var clip = new AnimationClip
+            {
+                frameRate = 60
+            };
+            AnimationUtility.SetObjectReferenceCurve(clip, binding, keys);
+
+            string path = Path.ChangeExtension(assetPath, "anim");
+            AssetDatabase.CreateAsset(clip, path);
         }
     }
 }
