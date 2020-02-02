@@ -1,0 +1,10 @@
+[package]
+name = "assembler"
+version = "0.1.0"
+authors = ["Tim Harding <tim@timharding.co>"]
+edition = "2018"
+
+[dependencies]
+image = "0.22.4"
+clap = "2.33.0"
+walkdir = "2.3.1"
