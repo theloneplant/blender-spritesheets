@@ -1,3 +1,4 @@
+import os
 import bpy
 import math
 from properties.SpriteSheetPropertyGroup import SpriteSheetPropertyGroup
@@ -19,9 +20,6 @@ class RenderTile(bpy.types.Operator):
         bpy.ops.wm.redraw_timer(type='DRAW', iterations=1)
 
         progress = float(progressProps.tileIndex + 1) / progressProps.tileTotal * 100
-        self.report({'INFO'}, "Rendering Action " + str(progressProps.actionIndex) +
-                    "/" + str(progressProps.actionTotal) + " " +
-                    progressProps.actionName + ": " + str(progress) + "%")
 
         scene.render.image_settings.file_format = 'PNG'
         scene.render.image_settings.color_mode = 'RGBA'
@@ -29,8 +27,9 @@ class RenderTile(bpy.types.Operator):
         scene.render.filter_size = 0  # Disable AA
         scene.render.bake_margin = 0
         scene.render.resolution_percentage = 100
-        scene.render.resolution_x = props.tileWidth
-        scene.render.resolution_y = props.tileHeight
-        scene.render.filepath = props.outputPath + "temp/" + progressProps.actionName + str(progressProps.tileIndex)
+        scene.render.resolution_x = props.tileSize[0]
+        scene.render.resolution_y = props.tileSize[1]
+        scene.render.filepath = os.path.join(
+            props.outputPath, "temp/") + progressProps.actionName + str(progressProps.tileIndex)
         bpy.ops.render.render(write_still=1)
         return {'FINISHED'}

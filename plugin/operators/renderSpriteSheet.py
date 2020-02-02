@@ -1,6 +1,9 @@
 import os
+import sys
 import bpy
 import math
+import shutil
+import subprocess
 from properties.SpriteSheetPropertyGroup import SpriteSheetPropertyGroup
 from properties.ProgressPropertyGroup import ProgressPropertyGroup
 
@@ -18,33 +21,42 @@ class RenderSpriteSheet(bpy.types.Operator):
         progressProps.success = False
         progressProps.actionTotal = len(bpy.data.actions)
 
-        objectToRender = scene.objects.get("Cube")
+        objectToRender = props.target
         for index, action in enumerate(bpy.data.actions):
             progressProps.actionName = action.name
             progressProps.actionIndex = index
-            # TODO: Configure which actions to render through UI for a given object
             objectToRender.animation_data.action = action
-            self.processAction(action, scene, progressProps, objectToRender)
+            self.processAction(action, scene, props,
+                               progressProps, objectToRender)
 
-        # TODO: Call Rust function to combine temp images
+        #subprocess.run([self.ASSEMBLER_PATH, "--root", props.outputPath])
         # TODO: Output JSON with metadata for importer
 
         progressProps.rendering = False
         progressProps.success = True
-        os.remove(props.outputPath + "temp/")
-        self.report({'INFO'}, "Finished Rendering Actions")
+        shutil.rmtree(os.path.join(
+            props.outputPath.replace("//", "./"), "temp/"))
         return {'FINISHED'}
 
-    def processAction(self, action, scene, progressProps, objectToRender):
+    def processAction(self, action, scene, props, progressProps, objectToRender):
         """Processes a single action by iterating through each frame and rendering tiles to a temp folder"""
         frameRange = action.frame_range
         frameMin = math.floor(frameRange[0])
         frameMax = math.ceil(frameRange[1])
         progressProps.tileTotal = frameMax - frameMin
-        for index in range(frameMin, frameMax):
-            progressProps.tileIndex = index
-            scene.frame_set(index)
-            # TODO: Unfortunately Blender's rendering happens on the same thread as the UI and freezes it while running,
-            # eventually they may fix this and then we can leverage some of the progress information we track
-            bpy.ops.spritesheets.render_tile('EXEC_DEFAULT')
+        actionPoseMarkers = action.pose_markers
+        if props.onlyRenderMarkedFrames is True and actionPoseMarkers is not None and len(actionPoseMarkers.keys()) > 0:
+            for marker in actionPoseMarkers.values():
+                progressProps.tileIndex = marker.frame
+                scene.frame_set(marker.frame)
+                # TODO: Unfortunately Blender's rendering happens on the same thread as the UI and freezes it while running,
+                # eventually they may fix this and then we can leverage some of the progress information we track
+                bpy.ops.spritesheets.render_tile('EXEC_DEFAULT')
+        else:
+            for index in range(frameMin, frameMax):
+                progressProps.tileIndex = index
+                scene.frame_set(index)
+                # TODO: Unfortunately Blender's rendering happens on the same thread as the UI and freezes it while running,
+                # eventually they may fix this and then we can leverage some of the progress information we track
+                bpy.ops.spritesheets.render_tile('EXEC_DEFAULT')
         return

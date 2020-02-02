@@ -2,8 +2,10 @@ import bpy
 import os
 import sys
 
-# Gets the cwd of the blend file, figure out a way to do this with absolute path
-dir = os.getcwd()
+ADDON_FOLDER_NAME = "plugin"
+
+# Add the addon's absolute path to the sys.path so we can reference custom modules
+dir = os.path.join(bpy.utils.script_path_user(), "addons", ADDON_FOLDER_NAME)
 if not dir in sys.path:
     sys.path.append(dir)
 print(dir)
@@ -15,14 +17,14 @@ from properties.SpriteSheetPropertyGroup import SpriteSheetPropertyGroup
 from properties.ProgressPropertyGroup import ProgressPropertyGroup
 
 bl_info = {
-    "name": "blender-spritesheets",
+    "name": "Blender Sprite Sheets",
     "author": "Michael LaPlante, Tim Harding",
     "description": "A Blender plugin that allows you to export 3D models and animations to spritesheets",
     "blender": (2, 80, 0),
     "version": (0, 0, 1),
     "location": "",
     "warning": "",
-    "category": "Generic"
+    "category": "Animation"
 }
 
 classes = (SpriteSheetPropertyGroup, ProgressPropertyGroup,
@@ -31,7 +33,7 @@ classes = (SpriteSheetPropertyGroup, ProgressPropertyGroup,
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
-    # Create a reference to the SpriteSheetPropertyGroup so other classes can use it
+    # Create a reference to property groups so other classes can use it
     bpy.types.Scene.SpriteSheetPropertyGroup = bpy.props.PointerProperty(
         type=SpriteSheetPropertyGroup)
     bpy.types.Scene.ProgressPropertyGroup = bpy.props.PointerProperty(
