@@ -33,7 +33,7 @@ fn main() -> Result<(), &'static str> {
     let root = matches.value_of("root").unwrap();
     let images = collect_images(root);
     let dims = dims(&images)?;
-    let tiles = optimal_stacking_width(images.len(), dims);
+    let tiles = optimal_stacking(images.len(), dims);
     let max_axis = {
         let width = tiles.x * dims.x;
         let height = tiles.y * dims.y;
@@ -72,7 +72,7 @@ fn dims(images: &[RgbaImage]) -> Result<Dims, &'static str> {
     }
 }
 
-fn optimal_stacking_width(count: usize, dims: Dims) -> Dims {
+fn optimal_stacking(count: usize, dims: Dims) -> Dims {
     struct Min {
         dim: usize,
         x: usize,
