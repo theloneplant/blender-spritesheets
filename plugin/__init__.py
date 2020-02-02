@@ -15,7 +15,7 @@ from properties.SpriteSheetPropertyGroup import SpriteSheetPropertyGroup
 bl_info = {
     "name": "blender-spritesheets",
     "author": "Michael LaPlante",
-    "description": "",
+    "description": "A Blender plugin that allows you to export 3D models and animations to spritesheets",
     "blender": (2, 80, 0),
     "version": (0, 0, 1),
     "location": "",
@@ -28,6 +28,7 @@ classes = (SpriteSheetPropertyGroup, RenderSpriteSheet, UI_PT_SpritePanel)
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
+    # Create a reference to the SpriteSheetPropertyGroup so other classes can use it
     bpy.types.Scene.SpriteSheetPropertyGroup = bpy.props.PointerProperty(
         type=SpriteSheetPropertyGroup)
 

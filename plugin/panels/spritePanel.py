@@ -2,6 +2,7 @@ import bpy
 from properties.SpriteSheetPropertyGroup import SpriteSheetPropertyGroup
 
 class UI_PT_SpritePanel(bpy.types.Panel):
+    """Panel for configuring and rendering sprite sheets"""
     bl_idname = "UI_PT_SpritePanel"
     bl_label = "Sprite Sheet Panel"
     bl_category = "Sprite Sheet"
@@ -9,11 +10,13 @@ class UI_PT_SpritePanel(bpy.types.Panel):
     bl_region_type = "UI"
 
     def draw(self, context):
+        """Draw method that initializes the UI for the panel"""
         layout = self.layout
 
         props = context.scene.SpriteSheetPropertyGroup
         row = layout.row()
         row.prop(props, "outputPath")
+        #TODO: add support to select object
         row = layout.row()
         row.prop(props, "tileWidth")
         row.prop(props, "tileHeight")
