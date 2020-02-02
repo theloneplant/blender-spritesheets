@@ -1,3 +1,7 @@
+use image::RgbaImage;
+use std::cmp::max;
+use std::path::PathBuf;
+
 #[derive(Debug, Copy, Clone)]
 struct Dims {
     x: usize,
@@ -19,48 +23,43 @@ fn main() -> Result<(), &'static str> {
         .get_matches();
 
     let root = matches.value_of("root").unwrap();
-
     let images = collect_images(root);
-
-    match images.len() {
-        0 => Err("Should have found at least one image"),
-        _ => Ok(()),
-    }?;
-
     let dims = dims(&images)?;
     let tiles = optimal_stacking_width(images.len(), dims);
+    let max_axis = {
+        let width = tiles.x * dims.x;
+        let height = tiles.y * dims.y;
+        max(width, height)
+    };
 
-    let width = tiles.x * dims.x;
-    let height = tiles.y * dims.y;
-    let max_axis = std::cmp::max(width, height);
-
-    let mut out: image::RgbaImage = image::ImageBuffer::new(max_axis as u32, max_axis as u32);
-    for i in 0..images.len() {
+    let mut out: RgbaImage = image::ImageBuffer::new(max_axis as u32, max_axis as u32);
+    for (i, img) in images.iter().enumerate() {
         let x = (i % tiles.x) * dims.x;
         let y = (i / tiles.x) * dims.y;
-        image::imageops::replace(&mut out, &images[i], x as u32, y as u32);
+        image::imageops::replace(&mut out, img, x as u32, y as u32);
     }
 
-    let out_path: std::path::PathBuf = [root, "out.png"].iter().collect();
+    let out_path: PathBuf = [root, "out.png"].iter().collect();
     out.save(out_path)
-        .map_err(|_| "Could not save spritesheet")?;
+        .map_err(|_| "Failed to save spritesheet")?;
 
     Ok(())
 }
 
-fn dims(images: &[image::RgbaImage]) -> Result<Dims, &'static str> {
+fn dims(images: &[RgbaImage]) -> Result<Dims, &'static str> {
     let mut iter = images.iter();
-    let first = iter.next().unwrap();
+    let first = match iter.next() {
+        Some(first) => Ok(first),
+        _ => Err("Should have found at least one image"),
+    }?;
     let dims = first.dimensions();
-    match images
-        .iter()
-        .fold(true, |acc, next| acc && next.dimensions() == dims)
-    {
-        true => Ok(Dims {
+    if images.iter().all(|next| next.dimensions() == dims) {
+        Ok(Dims {
             x: dims.0 as usize,
             y: dims.1 as usize,
-        }),
-        false => Err("All images should have the same format"),
+        })
+    } else {
+        Err("All images should have the same format")
     }
 }
 
@@ -76,7 +75,7 @@ fn optimal_stacking_width(count: usize, dims: Dims) -> Dims {
         },
         |min, x| {
             let y = y_from_x(x, count);
-            let dim = std::cmp::max(y * dims.y, x * dims.x);
+            let dim = max(y * dims.y, x * dims.x);
             if dim < min.dim {
                 Min { x, dim }
             } else {
@@ -94,8 +93,8 @@ fn y_from_x(x: usize, count: usize) -> usize {
     (count as f32 / x as f32).ceil() as usize
 }
 
-fn collect_images(root: &str) -> Vec<image::RgbaImage> {
-    let temporary: std::path::PathBuf = [root, "temp"].iter().collect();
+fn collect_images(root: &str) -> Vec<RgbaImage> {
+    let temporary: PathBuf = [root, "temp"].iter().collect();
     walkdir::WalkDir::new(temporary)
         .into_iter()
         .filter_map(|e| match image_filter(e) {
@@ -105,7 +104,7 @@ fn collect_images(root: &str) -> Vec<image::RgbaImage> {
         .collect::<Vec<_>>()
 }
 
-fn image_filter(entry: Result<walkdir::DirEntry, walkdir::Error>) -> Result<image::RgbaImage, ()> {
+fn image_filter(entry: Result<walkdir::DirEntry, walkdir::Error>) -> Result<RgbaImage, ()> {
     match image::open(entry.map_err(|_| ())?.path()).map_err(|_| ())? {
         image::ImageRgba8(img) => Ok(img),
         _ => Err(()),
