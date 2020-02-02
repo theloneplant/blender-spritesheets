@@ -20,6 +20,14 @@ fn main() -> Result<(), &'static str> {
                 .takes_value(true)
                 .required(true),
         )
+        .arg(
+            clap::Arg::with_name("output")
+                .short("o")
+                .long("out")
+                .value_name("PNG_FILENAME")
+                .help("Spritesheet output filename")
+                .takes_value(true)
+        )
         .get_matches();
 
     let root = matches.value_of("root").unwrap();
@@ -39,7 +47,8 @@ fn main() -> Result<(), &'static str> {
         image::imageops::replace(&mut out, img, x as u32, y as u32);
     }
 
-    let out_path: PathBuf = [root, "out.png"].iter().collect();
+    let output = matches.value_of("output").unwrap_or("out.png");
+    let out_path: PathBuf = [root, output].iter().collect();
     out.save(out_path)
         .map_err(|_| "Failed to save spritesheet")?;
 
