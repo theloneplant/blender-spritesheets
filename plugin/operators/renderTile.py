@@ -24,12 +24,12 @@ class RenderTile(bpy.types.Operator):
         scene.render.image_settings.file_format = 'PNG'
         scene.render.image_settings.color_mode = 'RGBA'
         scene.render.film_transparent = True  # Transparent PNG
-        scene.render.filter_size = 0  # Disable AA
         scene.render.bake_margin = 0
         scene.render.resolution_percentage = 100
         scene.render.resolution_x = props.tileSize[0]
         scene.render.resolution_y = props.tileSize[1]
         scene.render.filepath = os.path.join(
             props.outputPath, "temp/") + progressProps.actionName + str(progressProps.tileIndex)
+        bpy.context.scene.eevee.taa_render_samples = 1
         bpy.ops.render.render(write_still=1)
         return {'FINISHED'}

@@ -3,8 +3,6 @@ import os
 import sys
 import importlib
 
-ADDON_FOLDER_NAME = "plugin"
-
 ADDON_DIR = os.path.dirname(os.path.realpath(__file__))
 if not ADDON_DIR in sys.path:
     sys.path.append(ADDON_DIR)
@@ -19,8 +17,6 @@ from properties import ProgressPropertyGroup
 importlib.reload(ProgressPropertyGroup)
 from properties import SpriteSheetPropertyGroup
 importlib.reload(SpriteSheetPropertyGroup)
-
-print(dir(bpy))
 
 bl_info = {
     "name": "Blender Sprite Sheets",
@@ -58,3 +54,4 @@ def unregister():
 
 if __name__ == "__main__":
     register()
+  

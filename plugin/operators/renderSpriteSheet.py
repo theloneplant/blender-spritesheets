@@ -7,6 +7,15 @@ import subprocess
 from properties.SpriteSheetPropertyGroup import SpriteSheetPropertyGroup
 from properties.ProgressPropertyGroup import ProgressPropertyGroup
 
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+ASSEMBLER_PATH = os.path.normpath(
+    os.path.join(
+        SCRIPT_DIR,
+        "assembler.exe",
+    )
+)
+print(ASSEMBLER_PATH)
+
 class RenderSpriteSheet(bpy.types.Operator):
     """Operator used to render sprite sheets for an object"""
     bl_idname = "spritesheets.render"
@@ -29,13 +38,13 @@ class RenderSpriteSheet(bpy.types.Operator):
             self.processAction(action, scene, props,
                                progressProps, objectToRender)
 
-        #subprocess.run([self.ASSEMBLER_PATH, "--root", props.outputPath])
+        subprocess.run([ASSEMBLER_PATH, "--root", props.outputPath])
         # TODO: Output JSON with metadata for importer
 
         progressProps.rendering = False
         progressProps.success = True
-        shutil.rmtree(os.path.join(
-            props.outputPath.replace("//", "./"), "temp/"))
+        # shutil.rmtree(os.path.join(
+            # props.outputPath.replace("//", "./"), "temp/"))
         return {'FINISHED'}
 
     def processAction(self, action, scene, props, progressProps, objectToRender):
@@ -59,4 +68,3 @@ class RenderSpriteSheet(bpy.types.Operator):
                 # TODO: Unfortunately Blender's rendering happens on the same thread as the UI and freezes it while running,
                 # eventually they may fix this and then we can leverage some of the progress information we track
                 bpy.ops.spritesheets.render_tile('EXEC_DEFAULT')
-        return
