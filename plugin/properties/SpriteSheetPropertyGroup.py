@@ -1,6 +1,5 @@
 import bpy
 
-
 class SpriteSheetPropertyGroup(bpy.types.PropertyGroup):
     """Property group defining all of the configurable values for rendering sprite sheets"""
     outputPath = bpy.props.StringProperty(
