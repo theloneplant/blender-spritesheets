@@ -1,20 +1,26 @@
 import bpy
 import os
 import sys
+import importlib
 
 ADDON_FOLDER_NAME = "plugin"
 
-# Add the addon's absolute path to the sys.path so we can reference custom modules
-dir = os.path.join(bpy.utils.script_path_user(), "addons", ADDON_FOLDER_NAME)
-if not dir in sys.path:
-    sys.path.append(dir)
-print(dir)
+ADDON_DIR = os.path.dirname(os.path.realpath(__file__))
+if not ADDON_DIR in sys.path:
+    sys.path.append(ADDON_DIR)
 
-from panels.spritePanel import UI_PT_SpritePanel
-from operators.renderTile import RenderTile
-from operators.renderSpriteSheet import RenderSpriteSheet
-from properties.SpriteSheetPropertyGroup import SpriteSheetPropertyGroup
-from properties.ProgressPropertyGroup import ProgressPropertyGroup
+from panels import spritePanel
+importlib.reload(spritePanel)
+from operators import renderSpriteSheet
+importlib.reload(renderSpriteSheet)
+from operators import renderTile
+importlib.reload(renderTile)
+from properties import ProgressPropertyGroup
+importlib.reload(ProgressPropertyGroup)
+from properties import SpriteSheetPropertyGroup
+importlib.reload(SpriteSheetPropertyGroup)
+
+print(dir(bpy))
 
 bl_info = {
     "name": "Blender Sprite Sheets",
@@ -27,17 +33,22 @@ bl_info = {
     "category": "Animation"
 }
 
-classes = (SpriteSheetPropertyGroup, ProgressPropertyGroup,
-           RenderTile, RenderSpriteSheet, UI_PT_SpritePanel)
+classes = (
+    SpriteSheetPropertyGroup.SpriteSheetPropertyGroup,
+    ProgressPropertyGroup.ProgressPropertyGroup,
+    renderTile.RenderTile, 
+    renderSpriteSheet.RenderSpriteSheet, 
+    spritePanel.UI_PT_SpritePanel
+)
 
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
     # Create a reference to property groups so other classes can use it
     bpy.types.Scene.SpriteSheetPropertyGroup = bpy.props.PointerProperty(
-        type=SpriteSheetPropertyGroup)
+        type=SpriteSheetPropertyGroup.SpriteSheetPropertyGroup)
     bpy.types.Scene.ProgressPropertyGroup = bpy.props.PointerProperty(
-        type=ProgressPropertyGroup)
+        type=ProgressPropertyGroup.ProgressPropertyGroup)
 
 def unregister():
     for cls in classes:
