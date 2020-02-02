@@ -2,9 +2,13 @@ import bpy
 
 
 class SpriteSheetPropertyGroup(bpy.types.PropertyGroup):
+    """Property group defining all of the configurable values for rendering sprite sheets"""
     outputPath = bpy.props.StringProperty(
         name="Output Path",
         subtype="DIR_PATH"
+    )
+    objectToRender = bpy.props.StringProperty(
+        name="Object to Render"
     )
     tileWidth = bpy.props.IntProperty(
         name="tileWidth",
