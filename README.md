@@ -9,7 +9,7 @@ This tool is especially useful when you have complicated sprite sheets and don't
 1. Clone or download this repository and extract it
 1. (Optional) Move the bin folder into another folder of your choosing. This will need to exist as long as you want to use the Blender add on.
 1. Open __Blender__ (this addon was made using __2.81__), and open the addon panel by going to Edit > Preferences > Add-ons
-1. Click __Install__ and navigate to the repository you just downloaded and select __plugin.zip__
+1. Click __Install__ and navigate to the repository you just downloaded and select __blender-spritesheets.zip__
 1. The add on should be installed now, but it's disabled by default. Check the box next to __Animation: Blender Sprite Sheets__ in the Add-ons menu in Blender and it will be enabled
 1. In Blender's 3D Viewport you should now see a new tab on the right pop-out menu called Sprite Sheet
 1. You've successfully installed the add on
