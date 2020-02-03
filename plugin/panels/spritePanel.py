@@ -16,10 +16,11 @@ class UI_PT_SpritePanel(bpy.types.Panel):
         layout = self.layout
 
         props = context.scene.SpriteSheetPropertyGroup
-        progressProps = context.scene.ProgressPropertyGroup
 
         row = layout.row()
         row.label(text="Selection", icon="CURSOR")
+        row = layout.row()
+        row.prop(props, "binPath")
         row = layout.row()
         row.prop_search(props, "target", bpy.data, "objects")
         row = layout.row()
@@ -47,5 +48,3 @@ class UI_PT_SpritePanel(bpy.types.Panel):
 
         row = layout.row()
         row.operator("spritesheets.render", text="Render Sprite Sheet")
-        row = layout.row()
-        row.label(text="Note: Blender will freeze briefly")

@@ -3,19 +3,13 @@ import sys
 import bpy
 import math
 import shutil
+import platform
 import subprocess
 import json
 from properties.SpriteSheetPropertyGroup import SpriteSheetPropertyGroup
 from properties.ProgressPropertyGroup import ProgressPropertyGroup
 
-SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-ASSEMBLER_PATH = os.path.normpath(
-    os.path.join(
-        SCRIPT_DIR,
-        "assembler.exe",
-    )
-)
-print(ASSEMBLER_PATH)
+ASSEMBLER_FILENAME = "assembler.exe" if platform.system() is "Windows" else "assembler"
 
 class RenderSpriteSheet(bpy.types.Operator):
     """Operator used to render sprite sheets for an object"""
@@ -50,7 +44,14 @@ class RenderSpriteSheet(bpy.types.Operator):
             self.processAction(action, scene, props,
                                progressProps, objectToRender)
 
-        subprocess.run([ASSEMBLER_PATH, "--root", props.outputPath])
+        assemblerPath = os.path.normpath(
+            os.path.join(
+                props.binPath,
+                ASSEMBLER_FILENAME,
+            )
+        )
+        print("Assembler path: ", assemblerPath)
+        subprocess.run([assemblerPath, "--root", bpy.path.abspath(props.outputPath)])
 
         json_info = {
             "tileWidth": props.tileSize[0],
@@ -59,13 +60,13 @@ class RenderSpriteSheet(bpy.types.Operator):
             "animations": animation_descs,
         }
 
-        with open(os.path.join(props.outputPath, "out.bss"), "w") as f:
+        with open(bpy.path.abspath(os.path.join(props.outputPath, "out.bss")), "w") as f:
             json.dump(json_info, f, indent='\t')
 
         progressProps.rendering = False
         progressProps.success = True
-        shutil.rmtree(os.path.join(
-            props.outputPath.replace("//", "./"), "temp/"))
+        shutil.rmtree(bpy.path.abspath(os.path.join(
+            props.outputPath, "temp")))
         return {'FINISHED'}
 
 

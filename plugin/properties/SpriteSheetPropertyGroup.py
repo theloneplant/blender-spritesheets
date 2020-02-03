@@ -2,6 +2,12 @@ import bpy
 
 class SpriteSheetPropertyGroup(bpy.types.PropertyGroup):
     """Property group defining all of the configurable values for rendering sprite sheets"""
+    binPath = bpy.props.StringProperty(
+        name="Bin",
+        subtype="DIR_PATH",
+        description="Folder containing the executables for combining tiles",
+        default="./"
+    )
     target = bpy.props.PointerProperty(
         name="Target",
         description="Object to render with each animation",
