@@ -1,20 +1,20 @@
 # Blender Sprite Sheets
 ## Overview
-This addon will allow you to export a 3D model with animations to a sprite sheet and import it into Unity for use in pixel art or pseudo 3D assets to improve performance in your games or other projects. The way to use this add on is to model, rig, and animate assets the same way you would normally in Blender, and afterwards you can export all animations to a single image and JSON file. These two files can then be used by the Unity importer to automatically create animations for each action that you used in Blender to animate the original model.
+This addon allows you to export an animated 3D model to a sprite sheet and import it into Unity. It can be used for pixel art or pseudo-3D assets to improve performance in your game projects. Simply model, rig, and animate your assets in Blender as you would normally, and then export all animations to a texture sheet and metadata sidecar. These two files can be imported into Unity, creating animations automatically for each Blender action.
 
-This tool is especially useful when you have complicated sprite sheets and don't want to update them by hand each time a small change is made to the original. For instance, previously for sprite sheets in pixel art, the artist would need to meticulously change each frame of each animation for every direction that a sprite faced (especially hard in top down pixel art games).
+This tool is especially useful for complicated sprite sheets you don't want to manually update with each small change. Previously for pixel art sprite sheets, the artist had to meticulously change each frame of each animation for every direction that a sprite faced, especially hard in top down pixel art games.
 
 ## Installation
 ### Blender Add-on Installation
 1. Clone or download this repository and extract it
-2. Open Blender (this addon was made using __2.81__), and open the addon panel by going to Edit > Preferences > Add-ons
+2. Open Blender (this addon was made using __2.81__), and open the addon panel by going to `Edit > Preferences > Add-ons`
 3. Click __Install__ and navigate to the repository you just downloaded and select __plugin.zip__
 4. The add on should be installed now, but it's disabled by default. Check the box next to __Animation: Blender Sprite Sheets__ in the Add-ons menu in Blender and it will be enabled
 5. In Blender's 3D Viewport you should now see a new tab on the right pop-out menu called Sprite Sheet
 6. You've successfully installed the add on
 
 ### Unity Importer Installation
-TODO
+Use `Assets -> Import Package -> Custom Package` to browse for the Unity Importer package. 
 
 ## Usage
 ### Blender Add-on Usage
@@ -27,7 +27,7 @@ TODO
 7. Click on __Render Sprite Sheet__, note this may freeze Blender for a short time as the files are being rendered. Don't worry and let it do its thing. You should see the image generated in the output folder along with a JSON file that can be used for Unity importing.
 
 ### Unity Importer Usage
-TODO
+Import the texture and the `.bss` sidecar side-by-side anywhere in your assets folder. Sprites and animations should appear automatically in the same folder. 
 
 ## Examples
 If you aren't familiar with how Blender's animation system works, you can try using a sample .blend file in the __examples__ folder of the repository.
