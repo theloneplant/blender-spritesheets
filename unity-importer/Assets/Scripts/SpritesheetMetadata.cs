@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Spritesheet
 {
     [Serializable]
-    public class SpritesheetMetadata : ScriptableObject
+    public class SpritesheetMetadata
     {
         public int tileWidth;
         public int tileHeight;

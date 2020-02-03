@@ -7,40 +7,12 @@
 
     internal class SpritesheetImporter : AssetPostprocessor
     {
-        // Where to let the user change this? 
-        public SpriteAlignment alignment = SpriteAlignment.Center;
-
-        // Maps SpriteAlignment to pivot
-        private readonly Vector2[] pivots = new Vector2[]
-        {
-            // Center
-            new Vector2(0.5f, 0.5f),
-            // TopLeft
-            new Vector2(0.0f, 1.0f),
-            // TopCenter
-            new Vector2(0.5f, 1.0f),
-            // TopRight
-            new Vector2(1.0f, 1.0f),
-            // LeftCenter
-            new Vector2(0.0f, 0.5f),
-            // RightCenter
-            new Vector2(1.0f, 0.5f),
-            // BottomLeft
-            new Vector2(0.0f, 0.0f),
-            // BottomCenter
-            new Vector2(0.5f, 0.0f),
-            // BottomRight
-            new Vector2(1.0f, 0.0f),
-
-            // Custom is invalid, just default to center
-            new Vector2(0.5f, 0.5f),
-        };
-
         private void OnPreprocessTexture()
         {
-            SpritesheetMetadata metadata = GetMetadata();
+            SpritesheetMetadata metadata = GetMetadata(assetPath);
             if (metadata == null)
             {
+                Debug.Log("No spritesheet metadata at preprocess");
                 return;
             }
 
@@ -65,8 +37,8 @@
                     {
                         name = string.Format("{0}{1}", anim.name, i - previousStart),
                         border = Vector4.zero,
-                        alignment = (int)alignment,
-                        pivot = pivots[(int)alignment],
+                        alignment = (int)SpriteAlignment.Center,
+                        pivot = Vector2.one / 2f,
                         rect = rect,
                     });
                 }
@@ -77,67 +49,68 @@
             importer.spritesheet = tiles.ToArray();
         }
 
-        private void OnPostprocessTexture(Texture2D tex)
+        private static void OnPostprocessAllAssets(
+            string[] importedAssets,
+            string[] deletedAssets,
+            string[] movedAssets,
+            string[] movedFromAssetPaths)
         {
-            SpritesheetMetadata metadata = GetMetadata();
-            if (metadata == null)
+            foreach (string asset in importedAssets)
             {
-                return;
-            }
-
-            int previousStart = 0;
-            foreach (Animation anim in metadata.animations)
-            {
-                var binding = new EditorCurveBinding
+                Texture2D tex = AssetDatabase.LoadAssetAtPath<Texture2D>(asset);
+                if (tex == null)
                 {
-                    type = typeof(SpriteRenderer),
-                    path = "",
-                    propertyName = "m_Sprite"
-                };
-                Object[] sprites = AssetDatabase.LoadAllAssetRepresentationsAtPath(assetPath);
-                int count = anim.end - previousStart;
-                var keys = new ObjectReferenceKeyframe[count];
-                for (int i = 0; i < count; i++)
-                {
-                    keys[i] = new ObjectReferenceKeyframe
-                    {
-                        time = i,
-                        value = sprites[i + previousStart],
-                    };
+                    continue;
                 }
-                var clip = new AnimationClip
+
+                SpritesheetMetadata metadata = GetMetadata(asset);
+                if (metadata == null)
                 {
-                    frameRate = metadata.frameRate,
-                };
-                AnimationUtility.SetObjectReferenceCurve(clip, binding, keys);
+                    Debug.Log("No spritesheet metadata at postprocess");
+                    return;
+                }
 
-                DirectoryInfo parent = Directory.GetParent(assetPath);
-                string path = Path.Combine(parent.ToString(), string.Format("{0}.anim", anim.name));
-                AssetDatabase.CreateAsset(clip, path);
+                int previousStart = 0;
+                foreach (Animation anim in metadata.animations)
+                {
+                    var binding = new EditorCurveBinding
+                    {
+                        type = typeof(SpriteRenderer),
+                        path = "",
+                        propertyName = "m_Sprite"
+                    };
+                    Object[] sprites = AssetDatabase.LoadAllAssetRepresentationsAtPath(asset);
+                    int count = anim.end - previousStart;
+                    var keys = new ObjectReferenceKeyframe[count];
+                    for (int i = 0; i < count; i++)
+                    {
+                        keys[i] = new ObjectReferenceKeyframe
+                        {
+                            time = i,
+                            value = sprites[i + previousStart],
+                        };
+                    }
+                    var clip = new AnimationClip
+                    {
+                        frameRate = metadata.frameRate,
+                    };
+                    AnimationUtility.SetObjectReferenceCurve(clip, binding, keys);
 
-                previousStart = anim.end;
+                    DirectoryInfo parent = Directory.GetParent(asset);
+                    string path = Path.Combine(parent.ToString(), string.Format("{0}.anim", anim.name));
+                    AssetDatabase.CreateAsset(clip, path);
+
+                    previousStart = anim.end;
+                }
             }
-
         }
 
-        private SpritesheetMetadata GetMetadata()
+        private static SpritesheetMetadata GetMetadata(string path)
         {
-            string parent = Directory.GetParent(assetPath).ToString();
-            string name = Path.GetFileNameWithoutExtension(assetPath);
-            string query = string.Format("{0} t:SpritesheetMetadata", name);
-            string[] found = AssetDatabase.FindAssets(query, new string[] { parent });
-
-            foreach (string guid in found)
-            {
-                string path = AssetDatabase.GUIDToAssetPath(guid);
-                SpritesheetMetadata metadata = AssetDatabase.LoadAssetAtPath<SpritesheetMetadata>(path);
-                if (metadata.name == name)
-                {
-                    return metadata;
-                }
-            }
-
-            return null;
+            string metadataFilepath = Path.ChangeExtension(path, "bss");
+            string text = File.ReadAllText(metadataFilepath);
+            SpritesheetMetadata metadata = JsonUtility.FromJson<SpritesheetMetadata>(text);
+            return metadata.Valid ? metadata : null;
         }
     }
 }
