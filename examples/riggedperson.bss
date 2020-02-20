@@ -1,0 +1,11 @@
+{
+	"tileWidth": 80,
+	"tileHeight": 80,
+	"frameRate": 24,
+	"animations": [
+		{
+			"name": "Jump",
+			"end": 65
+		}
+	]
+}
