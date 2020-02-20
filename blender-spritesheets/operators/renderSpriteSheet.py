@@ -65,8 +65,7 @@ class RenderSpriteSheet(bpy.types.Operator):
 
         progressProps.rendering = False
         progressProps.success = True
-        shutil.rmtree(bpy.path.abspath(os.path.join(
-            props.outputPath, "temp")))
+        shutil.rmtree(bpy.path.abspath(os.path.join(props.outputPath, "temp")))
         return {'FINISHED'}
 
 

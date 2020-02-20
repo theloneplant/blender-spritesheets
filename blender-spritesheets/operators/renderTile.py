@@ -29,7 +29,18 @@ class RenderTile(bpy.types.Operator):
         scene.render.resolution_x = props.tileSize[0]
         scene.render.resolution_y = props.tileSize[1]
         scene.render.filepath = os.path.join(
-            props.outputPath, "temp/") + progressProps.actionName + str(progressProps.tileIndex)
+            props.outputPath, "temp/") + progressProps.actionName + index_to_string(progressProps.tileIndex, progressProps.tileTotal)
         bpy.context.scene.eevee.taa_render_samples = 1
         bpy.ops.render.render(write_still=1)
         return {'FINISHED'}
+
+def index_to_string(tile_index, tile_total):
+    empty_digits = count_digits(tile_total) - count_digits(tile_index)
+    return ("0" * empty_digits) + str(tile_index)
+
+def count_digits(n):
+    count=0
+    while(n>0):
+        count=count+1
+        n=n//10
+    return count
