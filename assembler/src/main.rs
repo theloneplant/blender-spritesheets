@@ -26,7 +26,7 @@ fn main() -> Result<(), &'static str> {
                 .long("out")
                 .value_name("PNG_FILENAME")
                 .help("Spritesheet output filename")
-                .takes_value(true)
+                .takes_value(true),
         )
         .get_matches();
 
@@ -105,7 +105,7 @@ fn y_from_x(x: usize, count: usize) -> usize {
 fn collect_images(root: &str) -> Vec<RgbaImage> {
     let temporary: PathBuf = [root, "temp"].iter().collect();
     walkdir::WalkDir::new(temporary)
-        .sort_by(|a,b| a.file_name().cmp(b.file_name()))
+        .sort_by(|a, b| a.file_name().cmp(b.file_name()))
         .into_iter()
         .filter_map(|e| match image_filter(e) {
             Ok(img) => Some(img),
