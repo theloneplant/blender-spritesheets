@@ -1,6 +1,8 @@
 use image::RgbaImage;
-use std::cmp::max;
-use std::path::PathBuf;
+use std::{cmp::max, path::PathBuf};
+
+mod errors;
+use errors::{ImageFormatError, InconsistentSizeError, NoImagesError};
 
 #[derive(Debug, Copy, Clone)]
 struct Dims {
@@ -8,7 +10,9 @@ struct Dims {
     y: usize,
 }
 
-fn main() -> Result<(), &'static str> {
+type BoxResult<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+
+fn main() -> BoxResult<()> {
     let matches = clap::App::new("assembler")
         .about("Combined PNGs into a spritesheet")
         .arg(
@@ -46,18 +50,14 @@ fn main() -> Result<(), &'static str> {
 
     let output = matches.value_of("output").unwrap_or("out.png");
     let out_path: PathBuf = [root, output].iter().collect();
-    out.save(out_path)
-        .map_err(|_| "Failed to save spritesheet")?;
+    out.save(out_path)?;
 
     Ok(())
 }
 
-fn dims(images: &[RgbaImage]) -> Result<Dims, &'static str> {
+fn dims(images: &[RgbaImage]) -> BoxResult<Dims> {
     let mut iter = images.iter();
-    let first = match iter.next() {
-        Some(first) => Ok(first),
-        _ => Err("Should have found at least one image"),
-    }?;
+    let first = iter.next().ok_or_else(|| NoImagesError)?;
     let dims = first.dimensions();
     if images.iter().all(|next| next.dimensions() == dims) {
         Ok(Dims {
@@ -65,7 +65,7 @@ fn dims(images: &[RgbaImage]) -> Result<Dims, &'static str> {
             y: dims.1 as usize,
         })
     } else {
-        Err("All images should have the same format")
+        Err(InconsistentSizeError.into())
     }
 }
 
@@ -111,9 +111,9 @@ fn collect_images(root: &str) -> Vec<RgbaImage> {
         .collect::<Vec<_>>()
 }
 
-fn image_filter(entry: Result<walkdir::DirEntry, walkdir::Error>) -> Result<RgbaImage, ()> {
-    match image::open(entry.map_err(|_| ())?.path()).map_err(|_| ())? {
+fn image_filter(entry: Result<walkdir::DirEntry, walkdir::Error>) -> BoxResult<RgbaImage> {
+    match image::open(entry?.path())? {
         image::ImageRgba8(img) => Ok(img),
-        _ => Err(()),
+        _ => Err(ImageFormatError.into()),
     }
 }
