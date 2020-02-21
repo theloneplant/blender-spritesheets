@@ -10,7 +10,7 @@ struct Dims {
     y: usize,
 }
 
-type BoxResult<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+type BoxResult<T> = Result<T, Box<dyn std::error::Error>>;
 
 fn main() -> BoxResult<()> {
     let matches = clap::App::new("assembler")

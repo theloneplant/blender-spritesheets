@@ -9,11 +9,7 @@ impl fmt::Display for ImageFormatError {
     }
 }
 
-impl error::Error for ImageFormatError {
-    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
-        None
-    }
-}
+impl error::Error for ImageFormatError {}
 
 #[derive(Debug, Clone)]
 pub struct InconsistentSizeError;
@@ -24,11 +20,7 @@ impl fmt::Display for InconsistentSizeError {
     }
 }
 
-impl error::Error for InconsistentSizeError {
-    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
-        None
-    }
-}
+impl error::Error for InconsistentSizeError {}
 
 #[derive(Debug, Clone)]
 pub struct NoImagesError;
@@ -39,8 +31,4 @@ impl fmt::Display for NoImagesError {
     }
 }
 
-impl error::Error for NoImagesError {
-    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
-        None
-    }
-}
+impl error::Error for NoImagesError {}
