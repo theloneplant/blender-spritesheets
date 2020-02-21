@@ -30,7 +30,7 @@
                 for (int i = previousStart; i < anim.end; i++)
                 {
                     int x = i % tilesX;
-                    int y = i / tilesX;
+                    int y = tilesY - i / tilesX - 1;
                     var dims = new Vector2(metadata.tileWidth, metadata.tileHeight);
                     var rect = new Rect(new Vector2(x, y) * dims, dims);
                     tiles.Add(new SpriteMetaData
@@ -86,7 +86,7 @@
                     {
                         keys[i] = new ObjectReferenceKeyframe
                         {
-                            time = i,
+                            time = (float)i / metadata.frameRate,
                             value = sprites[i + previousStart],
                         };
                     }

@@ -34,13 +34,10 @@ fn main() -> Result<(), &'static str> {
     let images = collect_images(root);
     let dims = dims(&images)?;
     let tiles = optimal_stacking(images.len(), dims);
-    let max_axis = {
-        let width = tiles.x * dims.x;
-        let height = tiles.y * dims.y;
-        max(width, height)
-    };
+    let width = (tiles.x * dims.x) as u32;
+    let height = (tiles.y * dims.y) as u32;
 
-    let mut out: RgbaImage = image::ImageBuffer::new(max_axis as u32, max_axis as u32);
+    let mut out: RgbaImage = image::ImageBuffer::new(width, height);
     for (i, img) in images.iter().enumerate() {
         let x = (i % tiles.x) * dims.x;
         let y = (i / tiles.x) * dims.y;
