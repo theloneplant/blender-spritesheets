@@ -83,7 +83,7 @@ class RenderSpriteSheet(bpy.types.Operator):
                 # eventually they may fix this and then we can leverage some of the progress information we track
                 bpy.ops.spritesheets.render_tile('EXEC_DEFAULT')
         else:
-            for index in range(frameMin, frameMax):
+            for index in range(frameMin, frameMax + 1):
                 progressProps.tileIndex = index
                 scene.frame_set(index)
                 # TODO: Unfortunately Blender's rendering happens on the same thread as the UI and freezes it while running,
