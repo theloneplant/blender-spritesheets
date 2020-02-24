@@ -16,9 +16,6 @@ class RenderTile(bpy.types.Operator):
         props = scene.SpriteSheetPropertyGroup
         progressProps = scene.ProgressPropertyGroup
 
-        # Force a redraw of the scene since this would freeze Blender otherwise
-        bpy.ops.wm.redraw_timer(type='DRAW', iterations=1)
-
         progress = float(progressProps.tileIndex + 1) / progressProps.tileTotal * 100
 
         scene.render.image_settings.file_format = 'PNG'

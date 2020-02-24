@@ -13,6 +13,11 @@ class SpriteSheetPropertyGroup(bpy.types.PropertyGroup):
         description="Object to render with each animation",
         type=bpy.types.Object
     )
+    actions = bpy.props.bpy.props.CollectionProperty(
+        name="Actions",
+        description="List of animations to render into a sprite sheet",
+        type=bpy.types.Action
+    )
     tileSize = bpy.props.IntVectorProperty(
         name="Tile Size",
         description="Size of an individual sprite",
@@ -30,6 +35,12 @@ class SpriteSheetPropertyGroup(bpy.types.PropertyGroup):
         name="Only render marked frames",
         description="Only renders frames that have an Action Pose Marker, allowing you to choose which frames to include with a sprite sheet. To add marked frames make sure 'Show Pose Markers' is selected in the Action Editor.\n\nNote: If no markers are specified this will render the action normally.",
         default=False
+    )
+    aaSamples = bpy.props.IntProperty(
+        name="Number of anti aliasing samples",
+        description="Reduces noise of the rendered tiles, set to 0 for nearest-neighbor filtering",
+        min=1,
+        default=1
     )
     outputPath = bpy.props.StringProperty(
         name="Path",

@@ -47,4 +47,4 @@ class UI_PT_SpritePanel(bpy.types.Panel):
         layout.separator()
 
         row = layout.row()
-        row.operator("spritesheets.render", text="Render Sprite Sheet")
+        row.operator("spritesheets.start_render", text="Render Sprite Sheet")

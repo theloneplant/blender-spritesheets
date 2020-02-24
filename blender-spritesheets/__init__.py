@@ -13,6 +13,8 @@ from operators import renderSpriteSheet
 importlib.reload(renderSpriteSheet)
 from operators import renderTile
 importlib.reload(renderTile)
+from operators import startRender
+importlib.reload(startRender)
 from properties import ProgressPropertyGroup
 importlib.reload(ProgressPropertyGroup)
 from properties import SpriteSheetPropertyGroup
@@ -32,8 +34,9 @@ bl_info = {
 classes = (
     SpriteSheetPropertyGroup.SpriteSheetPropertyGroup,
     ProgressPropertyGroup.ProgressPropertyGroup,
-    renderTile.RenderTile, 
-    renderSpriteSheet.RenderSpriteSheet, 
+    renderTile.RenderTile,
+    startRender.StartRender,
+    renderSpriteSheet.RenderSpriteSheet,
     spritePanel.UI_PT_SpritePanel
 )
 
@@ -45,12 +48,18 @@ def register():
         type=SpriteSheetPropertyGroup.SpriteSheetPropertyGroup)
     bpy.types.Scene.ProgressPropertyGroup = bpy.props.PointerProperty(
         type=ProgressPropertyGroup.ProgressPropertyGroup)
+    bpy.app.handlers.frame_change_post.append(render_workflow)
 
 def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)
     del bpy.types.Scene.SpriteSheetPropertyGroup
     del bpy.types.Scene.ProgressPropertyGroup
+    bpy.app.handlers.frame_change_post.remove(render_workflow)
+
+def render_workflow(context):
+    """Workflow run once per frame which checks for rendering status and renders one frame of the sprite sheet"""
+    bpy.ops.spritesheets.render('EXEC_DEFAULT')
 
 if __name__ == "__main__":
     register()
