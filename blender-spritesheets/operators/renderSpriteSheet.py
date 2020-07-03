@@ -9,7 +9,13 @@ import json
 from properties.SpriteSheetPropertyGroup import SpriteSheetPropertyGroup
 from properties.ProgressPropertyGroup import ProgressPropertyGroup
 
-ASSEMBLER_FILENAME = "assembler.exe" if platform.system() is "Windows" else "assembler"
+platform = platform.system()
+if platform == "Windows":
+    ASSEMBLER_FILENAME = "assembler.exe"
+elif platform == "Linux":
+    ASSEMBLER_FILENAME = "assembler_linux"
+else:
+    ASSEMBLER_FILENAME = "assembler_mac"
 
 class RenderSpriteSheet(bpy.types.Operator):
     """Operator used to render sprite sheets for an object"""
