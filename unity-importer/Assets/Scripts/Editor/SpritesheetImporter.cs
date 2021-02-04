@@ -16,7 +16,7 @@
                 return;
             }
 
-            var importer = assetImporter as TextureImporter;
+            TextureImporter importer = assetImporter as TextureImporter;
             Vector2Int size = importer.TextureSize();
 
             int tilesX = size.x / metadata.tileWidth;
@@ -27,12 +27,12 @@
             int previousStart = 0;
             foreach (Animation anim in metadata.animations)
             {
-                for (int i = previousStart; i < anim.end; i++)
+                for (int i = previousStart; i < anim.end + 1; i++)
                 {
                     int x = i % tilesX;
-                    int y = tilesY - i / tilesX - 1;
+                    int y = i / tilesX;
                     var dims = new Vector2(metadata.tileWidth, metadata.tileHeight);
-                    var rect = new Rect(new Vector2(x, y) * dims, dims);
+                    var rect = new Rect(new Vector2(x, (tilesY - 1) - y) * dims, dims);
                     tiles.Add(new SpriteMetaData
                     {
                         name = string.Format("{0}{1}", anim.name, i - previousStart),
@@ -57,12 +57,6 @@
         {
             foreach (string asset in importedAssets)
             {
-                Texture2D tex = AssetDatabase.LoadAssetAtPath<Texture2D>(asset);
-                if (tex == null)
-                {
-                    continue;
-                }
-
                 SpritesheetMetadata metadata = GetMetadata(asset);
                 if (metadata == null)
                 {
@@ -84,6 +78,9 @@
                     var keys = new ObjectReferenceKeyframe[count];
                     for (int i = 0; i < count; i++)
                     {
+                        if (sprites.Length == 0) break;
+
+                        Debug.Log("Making keyframe " + i);
                         keys[i] = new ObjectReferenceKeyframe
                         {
                             time = (float)i / metadata.frameRate,

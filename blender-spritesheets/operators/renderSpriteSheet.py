@@ -57,16 +57,17 @@ class RenderSpriteSheet(bpy.types.Operator):
             )
         )
         print("Assembler path: ", assemblerPath)
-        subprocess.run([assemblerPath, "--root", bpy.path.abspath(props.outputPath)])
+        subprocess.run([assemblerPath, "--root", bpy.path.abspath(props.outputPath), "--out", objectToRender.name + ".png"])
 
         json_info = {
+            "name": objectToRender.name,
             "tileWidth": props.tileSize[0],
             "tileHeight": props.tileSize[1],
             "frameRate": props.fps,
             "animations": animation_descs,
         }
 
-        with open(bpy.path.abspath(os.path.join(props.outputPath, "out.bss")), "w") as f:
+        with open(bpy.path.abspath(os.path.join(props.outputPath, objectToRender.name + ".bss")), "w") as f:
             json.dump(json_info, f, indent='\t')
 
         progressProps.rendering = False

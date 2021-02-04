@@ -6,6 +6,7 @@ namespace Spritesheet
     [Serializable]
     public class SpritesheetMetadata
     {
+        public string name;
         public int tileWidth;
         public int tileHeight;
         public int frameRate;
