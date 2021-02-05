@@ -16,7 +16,7 @@
                 return;
             }
 
-            TextureImporter importer = assetImporter as TextureImporter;
+            var importer = assetImporter as TextureImporter;
             Vector2Int size = importer.TextureSize();
 
             int tilesX = size.x / metadata.tileWidth;
@@ -57,6 +57,12 @@
         {
             foreach (string asset in importedAssets)
             {
+                Texture2D tex = AssetDatabase.LoadAssetAtPath<Texture2D>(asset);
+                if (tex == null)
+                {
+                    continue;
+                }
+
                 SpritesheetMetadata metadata = GetMetadata(asset);
                 if (metadata == null)
                 {
@@ -80,7 +86,6 @@
                     {
                         if (sprites.Length == 0) break;
 
-                        Debug.Log("Making keyframe " + i);
                         keys[i] = new ObjectReferenceKeyframe
                         {
                             time = (float)i / metadata.frameRate,
