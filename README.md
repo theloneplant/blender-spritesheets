@@ -17,6 +17,10 @@ This tool is especially useful for complicated sprite sheets you don't want to m
 ### Unity Importer Installation
 Use `Assets -> Import Package -> Custom Package` to browse for the Unity Importer package. 
 
+### Godot Importer Installation
+1. If you do not have an `addons` folder in your project, create one.
+2. Move the `godot-importer` folder into the `addons` folder.
+
 ## Usage
 ### Blender Add-on Usage
 1. In Blender's 3D Viewport, open the panel on the right side (it may be hidden by default, look for a small arrow near the top-right corner of the 3D Viewport area)
@@ -30,6 +34,11 @@ Use `Assets -> Import Package -> Custom Package` to browse for the Unity Importe
 
 ### Unity Importer Usage
 Import the texture and the `.bss` sidecar side-by-side anywhere in your assets folder. Sprites and animations should appear automatically in the same folder. 
+
+### Godot Importer Usage
+In the Godot editor, select the `.bss` file and go to the Import menu. Enter the spritesheet path and click on the Reimport button.
+You now have a 2D scene with a sprite and its animations.  
+For more details on the Import process, check the [Godot documentation](https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/import_process.html).
 
 ## Examples
 If you aren't familiar with how Blender's animation system works, you can try using a sample .blend file in the __examples__ folder of the repository.
