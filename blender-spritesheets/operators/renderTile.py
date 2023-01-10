@@ -15,6 +15,7 @@ class RenderTile(bpy.types.Operator):
         scene = context.scene
         props = scene.SpriteSheetPropertyGroup
         progressProps = scene.ProgressPropertyGroup
+        cameraProps = scene.CameraPropertyGroup
 
         # Force a redraw of the scene since this would freeze Blender otherwise
         bpy.ops.wm.redraw_timer(type='DRAW', iterations=1)
@@ -29,7 +30,7 @@ class RenderTile(bpy.types.Operator):
         scene.render.resolution_x = props.tileSize[0]
         scene.render.resolution_y = props.tileSize[1]
         scene.render.filepath = os.path.join(
-            props.outputPath, "temp/") + progressProps.actionName + index_to_string(progressProps.tileIndex, progressProps.tileTotal)
+            props.outputPath, "temp/") + progressProps.actionName + cameraProps.angleName + index_to_string(progressProps.tileIndex, progressProps.tileTotal)
         bpy.context.scene.eevee.taa_render_samples = 1
         bpy.ops.render.render(write_still=1)
         return {'FINISHED'}

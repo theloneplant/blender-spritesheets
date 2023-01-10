@@ -17,13 +17,15 @@ from properties import ProgressPropertyGroup
 importlib.reload(ProgressPropertyGroup)
 from properties import SpriteSheetPropertyGroup
 importlib.reload(SpriteSheetPropertyGroup)
+from properties import CameraPropertyGroup
+importlib.reload(CameraPropertyGroup)
 
 bl_info = {
-    "name": "Blender Sprite Sheets",
-    "author": "Michael LaPlante, Tim Harding",
+    "name": "Blender Sprite Sheets v2",
+    "author": "Michael LaPlante, Tim Harding, MediumSizeE",
     "description": "A Blender plugin that allows you to export 3D models and animations to spritesheets",
     "blender": (2, 80, 0),
-    "version": (0, 0, 1),
+    "version": (0, 0, 2),
     "location": "",
     "warning": "",
     "category": "Animation"
@@ -32,6 +34,7 @@ bl_info = {
 classes = (
     SpriteSheetPropertyGroup.SpriteSheetPropertyGroup,
     ProgressPropertyGroup.ProgressPropertyGroup,
+    CameraPropertyGroup.CameraPropertyGroup,
     renderTile.RenderTile, 
     renderSpriteSheet.RenderSpriteSheet, 
     spritePanel.UI_PT_SpritePanel
@@ -45,12 +48,15 @@ def register():
         type=SpriteSheetPropertyGroup.SpriteSheetPropertyGroup)
     bpy.types.Scene.ProgressPropertyGroup = bpy.props.PointerProperty(
         type=ProgressPropertyGroup.ProgressPropertyGroup)
+    bpy.types.Scene.CameraPropertyGroup = bpy.props.PointerProperty(
+        type=CameraPropertyGroup.CameraPropertyGroup)
 
 def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)
     del bpy.types.Scene.SpriteSheetPropertyGroup
     del bpy.types.Scene.ProgressPropertyGroup
+    del bpy.types.Scene.CameraPropertyGroup
 
 if __name__ == "__main__":
     register()
