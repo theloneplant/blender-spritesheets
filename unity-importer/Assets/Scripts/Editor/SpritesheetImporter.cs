@@ -57,6 +57,7 @@
         {
             foreach (string asset in importedAssets)
             {
+                Debug.Log("Asset being loaded:" + asset);
                 Texture2D tex = AssetDatabase.LoadAssetAtPath<Texture2D>(asset);
                 if (tex == null)
                 {
@@ -92,6 +93,7 @@
                             value = sprites[i + previousStart],
                         };
                     }
+                    Debug.Log("Found " + sprites.Length + " sprites to animate.");
                     var clip = new AnimationClip
                     {
                         frameRate = metadata.frameRate,
@@ -99,7 +101,11 @@
                     AnimationUtility.SetObjectReferenceCurve(clip, binding, keys);
 
                     DirectoryInfo parent = Directory.GetParent(asset);
-                    string path = Path.Combine(parent.ToString(), string.Format("{0}.anim", anim.name));
+                    Debug.Log("Application Datapath:" + Application.dataPath);
+                    // Remove path to project
+                    string pathFromProject = parent.ToString().Substring(Application.dataPath.Length - 6);
+                    string path = Path.Combine(pathFromProject, string.Format("{0}.anim", anim.name));
+                    Debug.Log("Creating at path:" + path);
                     AssetDatabase.CreateAsset(clip, path);
 
                     previousStart = anim.end;
