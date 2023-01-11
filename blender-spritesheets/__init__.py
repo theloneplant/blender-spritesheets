@@ -19,6 +19,8 @@ from properties import SpriteSheetPropertyGroup
 importlib.reload(SpriteSheetPropertyGroup)
 from properties import CameraPropertyGroup
 importlib.reload(CameraPropertyGroup)
+from helpers import cameraSettings
+importlib.reload(cameraSettings)
 
 bl_info = {
     "name": "Blender Sprite Sheets v2",

@@ -92,6 +92,7 @@ class RenderSpriteSheet(bpy.types.Operator):
         actionPoseMarkers = action.pose_markers        
         
         cameras = CameraSettingsFactory(18., 12., 45.).getCameraSettingsList()
+        print([camera.suffix for camera in cameras])
         for camera in cameras:
             camera.setRenderSettings(scene)
             cameraProps.angleName = camera.suffix
