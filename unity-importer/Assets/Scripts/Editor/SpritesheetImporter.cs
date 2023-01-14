@@ -24,10 +24,9 @@
             int tileCount = tilesX * tilesY;
 
             var tiles = new List<SpriteMetaData>();
-            int previousStart = 0;
             foreach (Animation anim in metadata.animations)
             {
-                for (int i = previousStart; i < anim.end + 1; i++)
+                for (int i = anim.start; i < anim.start + anim.count; i++)
                 {
                     int x = i % tilesX;
                     int y = i / tilesX;
@@ -35,14 +34,13 @@
                     var rect = new Rect(new Vector2(x, (tilesY - 1) - y) * dims, dims);
                     tiles.Add(new SpriteMetaData
                     {
-                        name = string.Format("{0}{1}", anim.name, i - previousStart),
+                        name = string.Format("{0}-{1}", anim.name, i - anim.start),
                         border = Vector4.zero,
                         alignment = (int)SpriteAlignment.Center,
                         pivot = Vector2.one / 2f,
                         rect = rect,
                     });
                 }
-                previousStart = anim.end;
             }
 
             importer.spriteImportMode = SpriteImportMode.Multiple;
@@ -71,6 +69,21 @@
                     return;
                 }
 
+                Object[] sprites = AssetDatabase.LoadAllAssetRepresentationsAtPath(asset);
+                // get sprite names in order
+                Dictionary<string, int> names = new();
+                int nameIndex = 0;
+                foreach (Object sprite in sprites) {
+                    string name = sprite.name.Split('-')[0];
+                    if (!names.ContainsKey(name)) {
+                        names.Add(name, nameIndex++);
+                    }
+                }
+                Debug.Log("Ordered names found: " + names);
+
+                // sort animations by sprite names
+                metadata.animations.Sort((x, y) => names[x.name].CompareTo(names[y.name]));
+                
                 int previousStart = 0;
                 foreach (Animation anim in metadata.animations)
                 {
@@ -80,10 +93,8 @@
                         path = "",
                         propertyName = "m_Sprite"
                     };
-                    Object[] sprites = AssetDatabase.LoadAllAssetRepresentationsAtPath(asset);
-                    int count = anim.end - previousStart;
-                    var keys = new ObjectReferenceKeyframe[count];
-                    for (int i = 0; i < count; i++)
+                    var keys = new ObjectReferenceKeyframe[anim.count];
+                    for (int i = 0; i < anim.count; i++)
                     {
                         if (sprites.Length == 0) break;
 
@@ -107,8 +118,7 @@
                     string path = Path.Combine(pathFromProject, string.Format("{0}.anim", anim.name));
                     Debug.Log("Creating at path:" + path);
                     AssetDatabase.CreateAsset(clip, path);
-
-                    previousStart = anim.end;
+                    previousStart += anim.count;
                 }
             }
         }

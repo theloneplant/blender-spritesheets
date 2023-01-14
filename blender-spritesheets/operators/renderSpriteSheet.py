@@ -10,6 +10,7 @@ from properties.SpriteSheetPropertyGroup import SpriteSheetPropertyGroup
 from properties.ProgressPropertyGroup import ProgressPropertyGroup
 from properties.CameraPropertyGroup import CameraPropertyGroup
 from helpers.cameraSettings import CameraSettingsFactory
+from copy import deepcopy
 
 platform = platform.system()
 if platform == "Windows":
@@ -36,22 +37,29 @@ class RenderSpriteSheet(bpy.types.Operator):
         cameraProps = scene.CameraPropertyGroup
 
         animation_descs = []
-        frame_end = 0
+        frame_start = 0
 
         objectToRender = props.target
-        for index, action in enumerate(bpy.data.actions):
+
+        # rust assembler combines in alphabetical order
+        anim_dir_order = deepcopy(CameraSettingsFactory.anim_suffix)
+        anim_dir_order.sort()
+        actions_sorted = [action for action in bpy.data.actions]
+        actions_sorted.sort(key=lambda action: action.name)
+
+        for index, action in enumerate(actions_sorted):
             progressProps.actionName = action.name
             progressProps.actionIndex = index
             objectToRender.animation_data.action = action
 
-            # TODO: need to update this thing, then also on the unity side
             for dir_num in range(8):
                 count, _, _ = frame_count(action.frame_range)
-                frame_end += count
                 animation_descs.append({
-                    "name": action.name + CameraSettingsFactory.anim_suffix[dir_num],
-                    "end": frame_end,
+                    "name": action.name + anim_dir_order[dir_num],
+                    "start": frame_start,
+                    "count": count,
                 })
+                frame_start += count
 
             self.processAction(action, scene, props,
                                progressProps, cameraProps, objectToRender)
@@ -91,10 +99,11 @@ class RenderSpriteSheet(bpy.types.Operator):
         progressProps.tileTotal = frameCount  
         actionPoseMarkers = action.pose_markers        
         
-        cameras = CameraSettingsFactory(18., 12., 45.).getCameraSettingsList()
+        cameras = CameraSettingsFactory(18., 12., 45.).getCameraSettingsList(CameraSettingsFactory.OBJECT_ROTATE)
         print([camera.suffix for camera in cameras])
         for camera in cameras:
             camera.setRenderSettings(scene)
+            camera.setObjectSettings(props)
             cameraProps.angleName = camera.suffix
 
             if props.onlyRenderMarkedFrames is True and actionPoseMarkers is not None and len(actionPoseMarkers.keys()) > 0:
@@ -116,4 +125,4 @@ class RenderSpriteSheet(bpy.types.Operator):
 def frame_count(frame_range):
     frameMin = math.floor(frame_range[0])
     frameMax = math.ceil(frame_range[1])
-    return (frameMax - frameMin, frameMin, frameMax)
+    return (frameMax + 1 - frameMin, frameMin, frameMax)

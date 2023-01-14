@@ -37,8 +37,9 @@ namespace Spritesheet
     public struct Animation
     {
         public string name;
-        public int end;
+        public int start;
+        public int count;
 
-        public bool Valid => name != null && end > -1;
+        public bool Valid => name != null && start > -1;
     }
 }
