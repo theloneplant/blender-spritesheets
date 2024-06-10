@@ -1,55 +1,65 @@
-
-tool
+@tool
 extends EditorImportPlugin
 
 
-func get_importer_name():
+func _get_importer_name():
     return "godot-bss-importer"
 
 
-func get_visible_name():
+func _get_visible_name():
     return "Scene"
 
 
-func get_recognized_extensions():
+func _get_recognized_extensions():
     return ["bss"]
 
 
-func get_save_extension():
+func _get_save_extension():
     return "tscn"
 
 
-func get_resource_type():
+func _get_resource_type():
     return "PackedScene"
 
 
-func get_preset_count():
+func _get_preset_count():
     return 0
 
 
-func get_import_options(preset):
+func _get_import_options(path, preset_index):
     return [
         {name="sheet_image", default_value="", property_hint=PROPERTY_HINT_FILE, hint_string="*.png", tooltip="Absolute path to the spritesheet .png."},
     ]
 
-
-func get_option_visibility(option, options):
+func _get_option_visibility(path, option_name, options):
     return true
 
+func _get_priority():
+    return 1.0
 
-func import(source_file, save_path, options, platform_variants, gen_files):
-    var file := File.new()
-    var err := file.open(source_file, File.READ)
-    if err != OK:
-        printerr("Failed to open file: ", err)
+func _get_import_order():
+    return 0
+
+func _import(source_file, save_path, options, platform_variants, gen_files):
+    var file := FileAccess.open(source_file, FileAccess.READ)
+    if not file:
+        printerr("Failed to open file")
         return FAILED
 
     var content = file.get_as_text()
-    var data = parse_json(content)
+    var json = JSON.new()
+    var data = json.parse_string(content)
     file.close()
+
+    if not json:
+        printerr("Failed to parse file")
+        return FAILED
 
     var framerate = data["frameRate"]
     var time_offset = 1 / framerate
+
+    if options["sheet_image"] == "":
+        return OK
 
     var texture = load(options["sheet_image"])
     if not texture:
@@ -58,19 +68,20 @@ func import(source_file, save_path, options, platform_variants, gen_files):
     var packed_scene = PackedScene.new()
     var scene = Node2D.new()
 
-    var sprite = Sprite.new()
+    var sprite = Sprite2D.new()
     scene.add_child(sprite, true)
     sprite.set_owner(scene)
 
     sprite.set_texture(texture)
     sprite.set_hframes(texture.get_width() / data["tileWidth"])
     sprite.set_vframes(texture.get_height() / data["tileHeight"])
-    
+
     var player = AnimationPlayer.new()
     scene.add_child(player, true)
     player.set_owner(scene)
-    
+
     var count = 0
+    var animation_library = AnimationLibrary.new()
     for anim_data in data["animations"]:
         var animation = Animation.new()
         var track_index = animation.add_track(Animation.TYPE_VALUE)
@@ -80,23 +91,24 @@ func import(source_file, save_path, options, platform_variants, gen_files):
         for i in range(count, anim_data["end"]):
             animation.track_insert_key(track_index, time, i)
             time += time_offset
-    
-            player.add_animation(anim_data["name"], animation)
+
+            animation_library.add_animation(anim_data["name"], animation)
 
         animation.set_length(time)
         count += anim_data["end"]
-        
-    err = packed_scene.pack(scene)
+    player.add_animation_library("bss", animation_library)
+
+    var err = packed_scene.pack(scene)
     if err != OK:
         printerr("Failed to pack scene: ", err)
         return FAILED
 
     scene.call_deferred('free')
 
-    var filename = save_path + "." + get_save_extension()
-    err = ResourceSaver.save(filename, packed_scene)
+    var filename = save_path + "." + _get_save_extension()
+    err = ResourceSaver.save(packed_scene, filename)
     if err != OK:
         printerr("Failed to save resource: ", err)
         return FAILED
-    
+
     return OK
